@@ -28,17 +28,17 @@ void printState(stateType *statePtr) {
     printf("end state\n");
 }
 
-int convertNum(int num) {
-    if (num & (1 << 15)) {
-        num -= (1 << 16);
+int convert(int x) {
+    if (x & (1 << 15)) {
+        x -= (1 << 16);
     }
-    return (num);
+    return x;
 }
-void decompose(int mc, int *opcode, int *regA, int *regB, int *offset) {
+void devide(int mc, int *opcode, int *reg1, int *reg2, int *offset) {
     *opcode = (mc >> 22) & 7;
-    *regA = (mc >> 19) & 7;
-    *regB = (mc >> 16) & 7;
-    *offset = convertNum(mc & 65535);
+    *reg1 = (mc >> 19) & 7;
+    *reg2 = (mc >> 16) & 7;
+    *offset = convert(mc & 65535);
 }
 
 
@@ -74,35 +74,36 @@ int main(int argc, char *argv[]) {
     }
 
     int opcode;
-    int regA;
-    int regB;
+    int reg1;
+    int reg2;
     int offset;
     int counter = 0;
     printf("\n");
     while (1)
     {
-        printState(&state); // print before executing the instruction
-        decompose(state.mem[state.pc], &opcode, &regA, &regB, &offset);
+        printState(&state);
+
+        devide(state.mem[state.pc], &opcode, &reg1, &reg2, &offset);
         if (opcode == 0) {
-            state.reg[offset] = state.reg[regA] + state.reg[regB];
+            state.reg[offset] = state.reg[reg1] + state.reg[reg2];
         }
         else if (opcode == 1) {
-            state.reg[offset] = ~(state.reg[regA] | state.reg[regB]);
+            state.reg[offset] = ~(state.reg[reg1] | state.reg[reg2]);
         }
         else if (opcode == 2) {
-            state.reg[regB] = state.mem[state.reg[regA] + offset];
+            state.reg[reg2] = state.mem[state.reg[reg1] + offset];
         }
         else if (opcode == 3) {
-            state.mem[state.reg[regA] + offset] = state.reg[regB];
+            state.mem[state.reg[reg1] + offset] = state.reg[reg2];
         }
         else if (opcode == 4) {
-            if (state.reg[regA] == state.reg[regB]) {
+            if (state.reg[reg1] == state.reg[reg2]) {
                 state.pc += offset;
             }
         }
         else if (opcode == 5) {
-            state.reg[regB] = state.pc + 1;
-            state.pc = state.reg[regA] - 1;
+            state.reg[reg2] = state.pc + 1;
+            state.pc = state.reg[reg1] - 1;
         }
         else if (opcode == 6) {
             printf("machine halted\ntotal of %d instructions " "executed\nfinal state of machine:\n", counter + 1);

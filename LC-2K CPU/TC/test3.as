@@ -7,4 +7,4 @@ start   add     1       2       1
 done    halt                           
 five    .fill   5
 neg1    .fill   -1
-stAddr  .fill   start                   will contain the address of start (2)
+stAddr  .fill   start  
